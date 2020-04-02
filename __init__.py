@@ -1,6 +1,6 @@
 # Encoding: utf-8
 
-from tkinter import Tk, Canvas, Button
+from tkinter import Tk, Canvas
 from random import randint
 
 
