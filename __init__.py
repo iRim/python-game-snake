@@ -17,6 +17,10 @@ class Snake:
     BUTTON_FONT = ('Tahoma', 24, 'bold')
     ERROR_COLOR = '#cc0000'
     ERROR_FONT = ('Tahoma', 18)
+    COUNTER_COLOR = '#333333'
+    COUNTER_FONT = ('Tahoma', 12)
+    SPEED = 300
+    SPEED_LINE = 50
     MOVES = {
         'Left': {'x': -1, 'y': 0},
         'Up': {'x': 0, 'y': -1},
@@ -27,11 +31,12 @@ class Snake:
 
     def __init__(self):
         self.endgame = True
-        self.timeout = 100
+        self.timeout = self.SPEED
         self.pixels = []
         self.pixels_coords = []
         self.food = []
         self.food_coords = []
+        self.score = 0
         self._createWindow()
 
     def _createWindow(self):
@@ -60,6 +65,8 @@ class Snake:
         self.body.itemconfig(self.text_start, state='hidden')
         self._generatePixels(3)
         self.MOVE = 'Right'
+
+        self.body.itemconfig(self.counter, state='normal')
 
         self._game()
 
@@ -95,6 +102,7 @@ class Snake:
 
     def _eatFood(self):
         if len(self.pixels_coords) > 0 and self.pixels_coords[-1] in self.food_coords:
+            self._updateCounter()
             # додаємо новий піксель у змійку
             x1, y1, x2, y2 = self.body.coords(self.pixels[0])
             new_pix = self._createPixel(x1, y1)
@@ -124,6 +132,21 @@ class Snake:
                 self.food_coords.append(food_coords)
                 self.food.append(food)
 
+    def _updateCounter(self, score=None):
+        if score and int(score) > 0:
+            self.score = score
+        else:
+            self.score = self.score + len(self.pixels)
+
+        self.body.itemconfig(self.counter, text='Рахунок: %s' % self.score)
+        self._changeSpeed()
+
+    def _changeSpeed(self):
+        points = self.score // self.SPEED_LINE
+        self.timeout = self.SPEED - points * self.SPEED_LINE
+        if self.timeout < self.SPEED_LINE:
+            self.timeout = self.SPEED_LINE
+
     def _endGame(self):
         # Визначаємо позицію голови
         x1, y1, x2, y2 = self.body.coords(self.pixels[-1])
@@ -134,10 +157,14 @@ class Snake:
             self.pixels = []
             self.food = []
             self.endgame = True
+            self._updateCounter(0)
+            self.body.itemconfig(self.counter, state='hidden')
             self.body.itemconfig(self.text_error, state='normal')
             self.body.itemconfig(self.text_start, state='normal')
 
     def _start(self):
+        self.counter = self.body.create_text(
+            self.BODY_W - 60, 10, text='Рахунок: 0', fill=self.COUNTER_COLOR, font=self.COUNTER_FONT, state='hidden')
         self.text_error = self.body.create_text(
             self.BODY_W/2, self.BODY_H/2, text='Ви програли!', fill=self.ERROR_COLOR, font=self.ERROR_FONT, state='hidden')
         self.text_start = self.body.create_text(
