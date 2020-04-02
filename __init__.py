@@ -30,6 +30,8 @@ class Snake:
         self.timeout = 100
         self.pixels = []
         self.pixels_coords = []
+        self.food = []
+        self.food_coords = []
         self._createWindow()
 
     def _createWindow(self):
@@ -68,6 +70,8 @@ class Snake:
 
     def _move(self):
         if self.endgame != True:
+            self._eatFood()
+
             self.pixels_coords = []
             self._generateFood()
             for i in range(len(self.pixels)):
@@ -84,21 +88,41 @@ class Snake:
                         self.pixels[i], x1, y1, x1 + self.PIX, y1 + self.PIX)
                     self._endGame()
 
-                self.pixels_coords.append(
-                    '{x}x{y}'.format(x=int(x1), y=int(y1)))
+                head_coords = '{x}x{y}'.format(x=int(x1), y=int(y1))
+                self.pixels_coords.append(head_coords)
+                if head_coords in self.food_coords:
+                    pass
+
+    def _eatFood(self):
+        if len(self.pixels_coords) > 0 and self.pixels_coords[-1] in self.food_coords:
+            # додаємо новий піксель у змійку
+            x1, y1, x2, y2 = self.body.coords(self.pixels[0])
+            new_pix = self._createPixel(x1, y1)
+            self.pixels.insert(0, new_pix)
+
+            # Видаляємо їжу з екрану
+            for food in self.food:
+                self.body.delete(food)
+            self.food = []
+            self.food_coords = []
 
     def _moveChange(self, e):
         if e.keysym in ['Left', 'Up', 'Right', 'Down']:
             self.MOVE = e.keysym
 
     def _generateFood(self):
-        rand_row = randint(1, self.BODY_H // self.PIX) * self.PIX
-        rand_col = randint(1, self.BODY_W // self.PIX) * self.PIX
-        food_coords = f'{rand_col}x{rand_row}'
-        if food_coords in self.pixels_coords:
-            self._generateFood()
-        else:
-            self._createElement(rand_col, rand_row, self.FOOD_BG)
+        if len(self.food) == 0:
+            rand_row = randint(1, (self.BODY_H - self.PIX) //
+                               self.PIX) * self.PIX
+            rand_col = randint(1, (self.BODY_W - self.PIX) //
+                               self.PIX) * self.PIX
+            food_coords = f'{rand_col}x{rand_row}'
+            if food_coords in self.pixels_coords:
+                self._generateFood()
+            else:
+                food = self._createElement(rand_col, rand_row, self.FOOD_BG)
+                self.food_coords.append(food_coords)
+                self.food.append(food)
 
     def _endGame(self):
         # Визначаємо позицію голови
