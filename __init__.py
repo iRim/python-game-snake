@@ -80,7 +80,7 @@ class Snake:
                     x1, y1, x2, y2 = self.body.coords(self.pixels[i + 1])
                     self.body.coords(self.pixels[i], x1, y1, x2, y2)
                 except IndexError as e:
-                    # Голови
+                    # Голова
                     moves = self.MOVES[self.MOVE]
                     x1 = x1 + self.PIX * moves['x']
                     y1 = y1 + self.PIX * moves['y']
@@ -127,10 +127,12 @@ class Snake:
     def _endGame(self):
         # Визначаємо позицію голови
         x1, y1, x2, y2 = self.body.coords(self.pixels[-1])
-        if x1 < 0 or x1 >= self.BODY_W or y1 < 0 or y1 >= self.BODY_H:
-            for pix in self.pixels:
-                self.body.delete(pix)
+        head_cords = '{x}x{y}'.format(x=int(x1), y=int(y1))
+        if x1 < 0 or x1 >= self.BODY_W or y1 < 0 or y1 >= self.BODY_H or head_cords in self.pixels_coords:
+            for item in self.pixels + self.food:
+                self.body.delete(item)
             self.pixels = []
+            self.food = []
             self.endgame = True
             self.body.itemconfig(self.text_error, state='normal')
             self.body.itemconfig(self.text_start, state='normal')
