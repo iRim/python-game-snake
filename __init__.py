@@ -116,7 +116,11 @@ class Snake:
 
     def _moveChange(self, e):
         if e.keysym in ['Left', 'Up', 'Right', 'Down']:
-            self.MOVE = e.keysym
+            if (self.MOVE == 'Left' and e.keysym != 'Right') or \
+                (self.MOVE == 'Up' and e.keysym != 'Down') or \
+                (self.MOVE == 'Right' and e.keysym != 'Left') or \
+                    (self.MOVE == 'Down' and e.keysym != 'Up'):
+                self.MOVE = e.keysym
 
     def _generateFood(self):
         if len(self.food) == 0:
